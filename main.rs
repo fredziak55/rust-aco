@@ -76,7 +76,7 @@ fn main() -> io::Result<()> {
 
     let duration = start_time.elapsed();
 
-    // println!("Path: {:?}", path);
+    println!("Path: {:?}", path);
     println!("Total distance: {}", total_distance);
     println!("Execution time: {:?}", duration);
 
