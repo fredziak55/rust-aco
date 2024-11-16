@@ -5,6 +5,7 @@ use std::time::Instant;
 use rand::Rng;
 use rayon::prelude::*;
 
+// Function to read points from a file
 fn read_points_from_file(file_path: &str) -> io::Result<Vec<(f64, f64)>> {
     let path = Path::new(file_path);
     let file = File::open(&path)?;
@@ -25,12 +26,14 @@ fn read_points_from_file(file_path: &str) -> io::Result<Vec<(f64, f64)>> {
     Ok(points)
 }
 
+// Function to calculate the distance between two points
 fn distance(point1: (f64, f64), point2: (f64, f64)) -> f64 {
     let (x1, y1) = point1;
     let (x2, y2) = point2;
     ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
 }
 
+// Struct representing the Ant Colony Optimization (ACO) algorithm
 struct ACO {
     alpha: f64,
     beta: f64,
@@ -40,6 +43,7 @@ struct ACO {
 }
 
 impl ACO {
+    // Constructor for ACO
     fn new(num_points: usize, alpha: f64, beta: f64, evaporation_rate: f64) -> Self {
         let pheromone = vec![vec![1.0; num_points]; num_points];
         let distances = vec![vec![0.0; num_points]; num_points];
@@ -52,6 +56,7 @@ impl ACO {
         }
     }
 
+    // Initialize distances between points
     fn initialize_distances(&mut self, points: &[(f64, f64)]) {
         for i in 0..points.len() {
             for j in 0..points.len() {
@@ -60,13 +65,16 @@ impl ACO {
         }
     }
 
+    // Update pheromones based on the paths found by the ants
     fn update_pheromones(&mut self, paths: &[(Vec<usize>, f64)]) {
+        // Evaporate pheromones
         for i in 0..self.pheromone.len() {
             for j in 0..self.pheromone.len() {
                 self.pheromone[i][j] *= 1.0 - self.evaporation_rate;
             }
         }
 
+        // Add pheromones based on the paths
         for (path, path_distance) in paths {
             for k in 0..path.len() - 1 {
                 let i = path[k];
@@ -77,13 +85,13 @@ impl ACO {
         }
     }
 
+    // Construct a solution (path) using the ACO algorithm
     fn construct_solution(&self, points: &[(f64, f64)]) -> (Vec<usize>, f64) {
         let mut rng = rand::thread_rng();
         let mut visited = vec![false; points.len()];
         let mut path = Vec::with_capacity(points.len());
         let mut total_distance = 0.0;
-
-        let mut current_point = rng.gen_range(0..points.len());
+        let mut current_point = 0; // Start from point 0
         path.push(current_point);
         visited[current_point] = true;
 
@@ -91,6 +99,7 @@ impl ACO {
             let mut probabilities = vec![0.0; points.len()];
             let mut sum_probabilities = 0.0;
 
+            // Calculate probabilities for moving to the next point
             for j in 0..points.len() {
                 if !visited[j] {
                     probabilities[j] = self.pheromone[current_point][j].powf(self.alpha)
@@ -99,6 +108,7 @@ impl ACO {
                 }
             }
 
+            // Select the next point based on probabilities
             let mut cumulative_probability = 0.0;
             let random_value = rng.gen::<f64>() * sum_probabilities;
             let mut next_point = 0;
@@ -119,6 +129,7 @@ impl ACO {
             current_point = next_point;
         }
 
+        // Complete the cycle by returning to the starting point
         total_distance += self.distances[current_point][path[0]];
         path.push(path[0]);
 
@@ -129,21 +140,27 @@ impl ACO {
 fn main() -> io::Result<()> {
     let start_time = Instant::now();
 
+    // Read points from file
     let points = read_points_from_file("../data/dane.txt")?;
     let num_points = points.len();
-    let mut aco = ACO::new(num_points, 1.0, 5.0, 0.5);
+
+    // Initialize ACO algorithm with specific alpha, beta, and evaporation_rate values
+    let mut aco = ACO::new(num_points, 1.0, 5.0, 0.1);
     aco.initialize_distances(&points);
 
-    let num_ants = 10;
-    let num_iterations = 50; // Reduced number of iterations
+    let num_ants = 60; // Number of ants
+    let num_iterations = 100; // Number of iterations
     let mut best_path = Vec::new();
     let mut best_distance = f64::INFINITY;
 
+    // Main loop of the ACO algorithm
     for _ in 0..num_iterations {
+        // Construct solutions in parallel
         let paths: Vec<(Vec<usize>, f64)> = (0..num_ants).into_par_iter().map(|_| {
             aco.construct_solution(&points)
         }).collect();
 
+        // Find the best path from the current iteration
         for (path, distance) in &paths {
             if *distance < best_distance {
                 best_distance = *distance;
@@ -151,11 +168,13 @@ fn main() -> io::Result<()> {
             }
         }
 
+        // Update pheromones based on the paths found
         aco.update_pheromones(&paths);
     }
 
     let duration = start_time.elapsed();
 
+    // Print the best path and distance found
     println!("Best path: {:?}", best_path);
     println!("Best distance: {}", best_distance);
     println!("Execution time: {:?}", duration);
