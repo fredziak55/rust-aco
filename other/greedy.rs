@@ -71,7 +71,7 @@ fn shortest_path(points: &[(f64, f64)]) -> (Vec<usize>, f64) {
 fn main() -> io::Result<()> {
     let start_time = Instant::now();
 
-    let points = read_points_from_file("dane.txt")?;
+    let points = read_points_from_file("../data/dane.txt.txt")?;
     let (path, total_distance) = shortest_path(&points);
 
     let duration = start_time.elapsed();

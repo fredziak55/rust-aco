@@ -1,5 +1,5 @@
 [package]
-name = "greedy_opt"
+name = "aco"
 version = "0.1.0"
 edition = "2021"
 

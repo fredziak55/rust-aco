@@ -129,7 +129,7 @@ impl ACO {
 fn main() -> io::Result<()> {
     let start_time = Instant::now();
 
-    let points = read_points_from_file("dane.txt")?;
+    let points = read_points_from_file("../data/dane.txt")?;
     let num_points = points.len();
     let mut aco = ACO::new(num_points, 1.0, 5.0, 0.5);
     aco.initialize_distances(&points);
