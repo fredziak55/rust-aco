@@ -148,7 +148,7 @@ fn main() -> io::Result<()> {
     let mut aco = ACO::new(num_points, 1.0, 5.0, 0.1);
     aco.initialize_distances(&points);
 
-    let num_ants = 60; // Number of ants
+    let num_ants = num_points; // Number of ants
     let num_iterations = 100; // Number of iterations
     let mut best_path = Vec::new();
     let mut best_distance = f64::INFINITY;
