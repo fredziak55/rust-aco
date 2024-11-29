@@ -135,6 +135,48 @@ impl ACO {
 
         (path, total_distance)
     }
+    
+}
+
+// Add this function to perform 3-opt local search
+fn three_opt(path: &mut Vec<usize>, distances: &Vec<Vec<f64>>) {
+    let num_points = path.len() - 1;
+    let mut improved = true;
+
+    while improved {
+        improved = false;
+        for i in 0..num_points - 2 {
+            for j in i + 1..num_points - 1 {
+                for k in j + 1..num_points {
+                    let delta = compute_gain(path, distances, i, j, k);
+                    if delta < -1e-6 {
+                        apply_swap(path, i, j, k);
+                        improved = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Helper function to compute the gain of a 3-opt move
+fn compute_gain(path: &Vec<usize>, distances: &Vec<Vec<f64>>, i: usize, j: usize, k: usize) -> f64 {
+    let a = path[i];
+    let b = path[i + 1];
+    let c = path[j];
+    let d = path[j + 1];
+    let e = path[k];
+    let f = path[(k + 1) % path.len()];
+
+    let d0 = distances[a][b] + distances[c][d] + distances[e][f];
+    let d1 = distances[a][c] + distances[b][e] + distances[d][f];
+    d1 - d0
+}
+
+// Helper function to apply the 3-opt move
+fn apply_swap(path: &mut Vec<usize>, i: usize, j: usize, k: usize) {
+    path[i + 1..j + 1].reverse();
+    path[j + 1..k + 1].reverse();
 }
 
 fn main() -> io::Result<()> {
@@ -157,7 +199,15 @@ fn main() -> io::Result<()> {
     for _ in 0..num_iterations {
         // Construct solutions in parallel
         let paths: Vec<(Vec<usize>, f64)> = (0..num_ants).into_par_iter().map(|_| {
-            aco.construct_solution(&points)
+            let mut path = aco.construct_solution(&points).0;
+            // Apply 3-opt local search
+            three_opt(&mut path, &aco.distances);
+            // Recalculate the total distance after 3-opt
+            let mut total_distance = 0.0;
+            for i in 0..path.len() - 1 {
+                total_distance += aco.distances[path[i]][path[i + 1]];
+            }
+            (path, total_distance)
         }).collect();
 
         // Find the best path from the current iteration
