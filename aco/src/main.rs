@@ -196,7 +196,8 @@ fn main() -> io::Result<()> {
     let mut best_distance = f64::INFINITY;
 
     // Main loop of the ACO algorithm
-    for _ in 0..num_iterations {
+    for iteration in 0..num_iterations {
+        println!("Iteration: {}", iteration);
         // Construct solutions in parallel
         let paths: Vec<(Vec<usize>, f64)> = (0..num_ants).into_par_iter().map(|_| {
             let mut path = aco.construct_solution(&points).0;
@@ -228,6 +229,9 @@ fn main() -> io::Result<()> {
     println!("Best path: {:?}", best_path);
     println!("Best distance: {}", best_distance);
     println!("Execution time: {:?}", duration);
+
+    // best_path.sort();
+    // println!("Best path sorted: {:?}", best_path);
 
     Ok(())
 }
