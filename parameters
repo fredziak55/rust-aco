@@ -3,3 +3,9 @@ bier 118512 - 100 iteracji
 tsp250 12645 - 50 iteracji
 tsp500 86789 - 8 iteracji mrowki / 3, 113sekund
 tsp1000 24592- 1 iteracji, mrowki / 8, 141sekund (2 iteracje jeżeli na kompie szkolnym)  
+a280 - 50 iteracji
+lin318 - 25 iteracji
+eil101 - 100 iteracji
+kroA200 - 50 iteracji
+rat575 - 7 iteracji
+lin105,pr136,rat99 - 100 iteracji
