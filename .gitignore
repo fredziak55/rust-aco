@@ -27,4 +27,4 @@ Cargo.lock
 main
 
 #not not uploading files
-*.txt
+# *.txt
