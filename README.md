@@ -1,4 +1,4 @@
-# Projekt na optymalizację kombinatoryczną
+# Implementation of ACO in Rust
 
 ## How to start
 In terminal
